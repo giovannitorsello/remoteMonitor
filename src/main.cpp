@@ -55,6 +55,7 @@ void setup()
 
 void loop()
 {
+  srv->webSocketLoop();
   if (srv->listenClient())
   {
     alive_by_led();
