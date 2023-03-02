@@ -1,8 +1,29 @@
 <html>
 <script>
+    function InitWebSocket() {
+
+        // Let us open a web socket
+        var ws = new WebSocket('ws://' + ip + ':81/');
+
+        ws.onopen = function () {
+            console.log("Connected.");
+            ws.send("Ciao bello");
+        };
+
+        ws.onmessage = function (evt) {
+            var received_msg = evt.data;
+            console.log(received_msg);
+        };
+
+        ws.onclose = function () {
+            console.log("Disconencted.");
+        };
+
+    }
+
     var ip = location.hostname;
     ip = "192.168.1.104";
-    var connection = new WebSocket('ws://' + ip + ':81/', ['arduino']);
+    InitWebSocket();
 </script>
 
 <head>Remote Monitor 1.0</head>

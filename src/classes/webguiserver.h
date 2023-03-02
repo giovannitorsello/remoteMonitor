@@ -3,53 +3,16 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Ethernet.h>
-#include <WebSocketsServer.h>
+#include "../../lib/WebSocket/WebSocketServer.h"
 #include "./classes/config.h"
 #include "./classes/sdcard.h"
+
+using namespace net;
 EthernetServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(81);
+WebSocketServer webSocketServer(81);
 
-static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
+void verifyClientCallback()
 {
-
-    char buf[512];
-    switch (type)
-    {
-    case WStype_DISCONNECTED:
-
-        // sprintf(buf, "WebSocket LOG: [%u] Disconnected!", num);
-        // Serial.println(buf);
-        break;
-
-    case WStype_CONNECTED:
-
-        // IPAddress ip = webSocket.remoteIP(num);
-        // sprintf(buf, "WebSocket LOG: [%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-        sprintf(buf, "WebSocket LOG: [%u] Connected!", num);
-        Serial.println(buf);
-
-        // send message to client
-        webSocket.sendTXT(num, "Connected");
-        break;
-    case WStype_ERROR:
-        sprintf(buf, "WebSocket LOG: [%u] Error!", num);
-        Serial.println(buf);
-
-        break;
-    case WStype_BIN:
-        break;
-    case WStype_TEXT:
-
-        sprintf(buf, "WebSocket LOG: [%u] get Text: %s", num, payload);
-        Serial.println(buf);
-
-        if (payload[0] == '#')
-        {
-            // Do something
-        }
-
-        break;
-    }
 }
 
 class WebGuiServer
@@ -61,20 +24,45 @@ private:
     Config *cnf = 0;
     SdCard *sd = 0;
 
+protected:
+    
 public:
     WebGuiServer()
     {
-        initServer();
+        initWebServer();
+        initWebSocket();
     }
 
-    void initServer()
+    void initWebSocket()
+    {
+       
+        webSocketServer.onConnection([](WebSocket &ws)
+        {        
+            ws.onClose([](WebSocket &ws, const WebSocket::CloseCode code,const char *reason, uint16_t length){ 
+                Serial.println("Client close connection."); 
+            });
+
+            ws.onMessage([](WebSocket &ws, const WebSocket::DataType dataType,const char *message, uint16_t length) { 
+                char bufMessage[100];
+                sprintf(bufMessage,"%s -> %s", "Ricevuto --->", message);
+                if(strcmp(message,"getSensorData")==0) {}
+                if(strcmp(message,"switchChannels")==0) {}
+                if(strcmp(message,"setPowerA_Off")==0) {}
+                if(strcmp(message,"setPowerB_Off")==0) {}
+                
+
+                ws.send(WebSocket::DataType::TEXT, bufMessage, strlen(bufMessage)); 
+            }); 
+        });
+
+        server.begin();
+    }
+
+    void initWebServer()
     {
         // INIT SD CARD FIRST
         sd = new SdCard();
         // INIT WebSocket
-
-        webSocket.begin();
-        webSocket.onEvent(webSocketEvent);
 
         // Disable SD Card
         // pinMode(sdPinSelect, OUTPUT);
@@ -125,7 +113,7 @@ public:
 
     int webSocketLoop()
     {
-        webSocket.loop();
+        webSocketServer.listen();
         return 0;
     }
 
