@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../../Attivita/WIFINETCOM_SRL/PowerStation/ArduinoMega"
+		},
+		{
+			"name": "RemoteMonitor",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.java": "java",
+			"ratio": "cpp"
+		}
+	}
+}

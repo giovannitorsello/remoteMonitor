@@ -1,0 +1,17 @@
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = iot.wifinetcom.net
+DNS.2 = iot.wfn.net
+DNS.3 = embedded.wifinetcom.net
+DNS.4 = embedded.wfn.net
+DNS.5 = powerstation.wifinetcom.net
+DNS.6 = powerstation.wfn.net
+DNS.7 = remotemonitor.wifinetcom.net
+DNS.8 = remotemonitor.wfn.net
+DNS.9 = ipcontroller.wfn.net
+DNS.10 = ipcontroller.wifinetcom.net
+DNS.11 = domotics.wifinetcom.net
+DNS.12 = domotics.wfn.net

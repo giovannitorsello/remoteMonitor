@@ -6,7 +6,7 @@
 #include "../../lib/WebSocket/WebSocketServer.h"
 #include "./classes/config.h"
 #include "./classes/sdcard.h"
-
+#define UNKNOWN_PIN 0xFF
 using namespace net;
 EthernetServer server(80);
 WebSocketServer webSocketServer(81);
@@ -25,6 +25,40 @@ private:
     SdCard *sd = 0;
 
 protected:
+
+
+    uint8_t getPinMode(uint8_t pin)
+    {
+    uint8_t bit = digitalPinToBitMask(pin);
+    uint8_t port = digitalPinToPort(pin);
+
+    // I don't see an option for mega to return this, but whatever...
+    if (NOT_A_PIN == port) return UNKNOWN_PIN;
+
+    // Is there a bit we can check?
+    if (0 == bit) return UNKNOWN_PIN;
+
+    // Is there only a single bit set?
+    if (bit & bit - 1) return UNKNOWN_PIN;
+
+    volatile uint8_t *reg, *out;
+    reg = portModeRegister(port);
+    out = portOutputRegister(port);
+
+    if (*reg & bit)
+        return OUTPUT;
+    else if (*out & bit)
+        return INPUT_PULLUP;
+    else
+        return INPUT;
+    }
+    
+    int getPinsMode(WebSocket &ws) {
+        for(int pin=0;pin<100;pin++) {
+            uint8_t pinMode=getPinMode();
+        }
+        return 0;
+    }
     
 public:
     WebGuiServer()
