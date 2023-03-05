@@ -37,8 +37,9 @@
           :id="getChipPinId(output.pin)" 
           :label="output.description" v-for="output in group.digitalOutputs" 
           v-bind:key="output.pin"
-          model.value="switches"
-          update:modelValue="manageSwitches"></v-switch>        
+          v-model="switches"
+          :value="output.pin"
+          @click="manageSwitches"></v-switch>        
       </v-card>
       <v-divider></v-divider>
     </template>
@@ -56,8 +57,8 @@ export default {
       switches: []
     }),
     methods: {
-      manageSwitches: () => {
-        console.log("Change switch value: ");
+      manageSwitches: (elem) => {
+        console.log(elem.srcElement.value);
       },
       getChipPinId: (pin)=>{
           return "chipInputPin"+pin;
@@ -65,7 +66,7 @@ export default {
       setDigitalOutputHigh: (pin) =>{
         var id="chipInputPin"+pin;
         if(document.getElementById(id))
-        document.getElementById(id).style.color="red";
+        document.getElementById(id).style.color="green";
       },
       setDigitalOutputLow: (pin) =>{
         var id="chipInputPin"+pin;
@@ -75,11 +76,20 @@ export default {
     },
     created() {
       const component=this;
-      setTimeout(() => {
+      setInterval(() => {
         console.log("Try to change status...",component);
         this.setDigitalOutputHigh(5);
         this.setDigitalOutputLow(6);
+        this.setDigitalOutputHigh(12);
+        this.setDigitalOutputLow(13);
       },5000);
+      setInterval(() => {
+        console.log("Try to change status...",component);
+        this.setDigitalOutputHigh(6);
+        this.setDigitalOutputLow(5);
+        this.setDigitalOutputHigh(13);
+        this.setDigitalOutputLow(12);
+      },7000);
 
     },
 
