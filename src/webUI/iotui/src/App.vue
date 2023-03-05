@@ -3,6 +3,9 @@
 </template>
 
 <script setup>
+
+import { mapState, mapActions } from 'pinia'
+import {useAppStore} from "./store/app.js"
   
 function setCorsAccess() {
   var all_app_domains =
@@ -51,12 +54,15 @@ var pinConfig={
     };
 
     function readConfiguration() {
+        const appStore=useAppStore();
+                
         fetch('./config.json')
             .then((response) => response.json())
             .then((json) => {
                 pinConfig= json; 
                 console.log("Config loaded is: ");
                 console.log(pinConfig);
+                appStore.pinConfiguration=pinConfig;                
             });
     }
 
