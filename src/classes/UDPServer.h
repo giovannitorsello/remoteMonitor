@@ -37,38 +37,25 @@ public:
         Ethernet.begin(mac, ip);
         Ethernet.init(10);*/
         cnf = new Config();
-        _configData cnfData = cnf->getConfig();
-        cnf->printConfiguration();
-        // Select the IP address according to your local network
-        byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-        IPAddress myIP(cnfData.ip_address[0], cnfData.ip_address[1], cnfData.ip_address[2], cnfData.ip_address[3]);
-        IPAddress mySN(cnfData.netmask[0], cnfData.netmask[1], cnfData.netmask[2], cnfData.netmask[3]);
-        IPAddress myGW(cnfData.gateway[0], cnfData.gateway[1], cnfData.gateway[2], cnfData.gateway[3]);
-        IPAddress myDNS(cnfData.dns[0], cnfData.dns[1], cnfData.dns[2], cnfData.dns[3]);
-        Ethernet.begin(mac, myIP, myDNS, myGW, mySN);
+        applyNetworkConfig();
+                    
+        if (Ethernet.hardwareStatus() == EthernetNoHardware)
+            Serial.println("Ethernet shield was not found");
+        if (Ethernet.linkStatus() == LinkOFF)
+            Serial.println("Ethernet cable is not connected.");
+    
+        Serial.print("Arduino's IP Address: ");
+        Serial.println(Ethernet.localIP());
 
-        if (Ethernet.begin(mac) == 0)
-        {            
-            Serial.println("Failed to obtaining an IP address");
-            if (Ethernet.hardwareStatus() == EthernetNoHardware)
-                Serial.println("Ethernet shield was not found");
-            if (Ethernet.linkStatus() == LinkOFF)
-                Serial.println("Ethernet cable is not connected.");
-        }
-        else
-        {
-            Serial.print("Arduino's IP Address: ");
-            Serial.println(Ethernet.localIP());
+        Serial.print("DNS Server's IP Address: ");
+        Serial.println(Ethernet.dnsServerIP());
 
-            Serial.print("DNS Server's IP Address: ");
-            Serial.println(Ethernet.dnsServerIP());
+        Serial.print("Gateway's IP Address: ");
+        Serial.println(Ethernet.gatewayIP());
 
-            Serial.print("Gateway's IP Address: ");
-            Serial.println(Ethernet.gatewayIP());
-
-            Serial.print("Network's Subnet Mask: ");
-            Serial.println(Ethernet.subnetMask());
-        }
+        Serial.print("Network's Subnet Mask: ");
+        Serial.println(Ethernet.subnetMask());
+    
 
         Serial.println("UDP server is starting...");
         cnf=new Config();
@@ -206,7 +193,7 @@ public:
         }
 
         if(strncmp(bufCommand, "wfn apply configuration", 23)==0) {       
-            applyNetworkConfig();
+            applyNetworkConfig();            
             cnf->printConfiguration();
         }
 
@@ -223,7 +210,8 @@ public:
         char bufBaecon[100];
         _configData cnfData=cnf->getConfig();
         sprintf(bufBaecon,"%s",cnfData.name);
-        Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+        IPAddress broadcast(255,255,255,255);
+        Udp.beginPacket(broadcast, 3000);
         Udp.write(bufBaecon);
         Udp.endPacket();        
     }
