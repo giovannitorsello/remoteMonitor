@@ -6,7 +6,8 @@
 
 #include "./classes/config.h"
 #include "./classes/sdcard.h"
-#include "./classes/webguiserver.h"
+#include "./classes/UDPServer.h"
+#include "./classes/IOTServices.h"
 #include "./classes/screen.h"
 #include "./classes/thermometer.h"
 
@@ -26,9 +27,12 @@
 
 Config *cnf = 0;
 SdCard *sd = 0;
-WebGuiServer *srv = 0;
+IOTServices *srv = 0;
 Screen *sc = 0;
 Thermometer *th = 0;
+UDPServer *udpServer=0;
+
+int nLoop=0;
 
 void alive_by_led()
 {
@@ -49,16 +53,26 @@ void setup()
   // sd = new SdCard();
   //  cnf = new Config();
   //  sc = new Screen(SCREEN_ADDRESS, SCREEN_WIDTH, SCREEN_HEIGHT, OLED_RESET, &Wire);
-  //  th = new Thermometer(ONE_WIRE_BUS);
-  srv = new WebGuiServer();
+  //  th = new Thermometer(ONE_WIRE_BUS);  
+  srv = new IOTServices();
+  udpServer= new UDPServer();
 }
 
 void loop()
 {
+  udpServer->udpServerLoop();
   srv->webSocketLoop();
   if (srv->listenClient())
   {
     alive_by_led();
   }
   delay(1);
+  
+  //Section periodic operations
+  nLoop++;
+  if(nLoop%3000==0){
+    nLoop=0;
+    udpServer->sendBaecon();
+  }
+
 }
