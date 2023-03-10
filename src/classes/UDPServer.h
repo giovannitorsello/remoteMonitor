@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+#include "../constants.h"
 #include "./classes/config.h"
 #include "./classes/sdcard.h"
 #define UDP_TX_PACKET_MAX_SIZE 100
@@ -12,7 +13,7 @@
 byte mac[] = {0x16, 0xAD, 0xA4, 0xD2, 0x1A, 0x01};
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 char replyBuffer[UDP_TX_PACKET_MAX_SIZE]; 
-
+char pinStatusArray[NUM_TOT_PIN];
 
 class UDPServer
 {
@@ -32,10 +33,6 @@ public:
 
     void initUdpServer() {
 
-        /*Serial.println("Obtaining an IP address using DHCP");        
-        IPAddress ip(192, 168, 1, 12);
-        Ethernet.begin(mac, ip);
-        Ethernet.init(10);*/
         cnf = new Config();
         applyNetworkConfig();
                     
@@ -197,7 +194,43 @@ public:
             cnf->printConfiguration();
         }
 
+        if(strncmp(bufCommand, "wfn print pin status", 20)==0) {
+            char bufToSend[UDP_TX_PACKET_MAX_SIZE];       
+            for(int i=0;i<NUM_TOT_PIN;i++){
+                int pinStatus=digitalRead(i);
+                pinStatusArray[i]=pinStatus;
+                sprintf(bufToSend,"pin %d status ->%d\n",i,pinStatus);
+                sendString(bufToSend);
+            }
+        }
+
+        if(strncmp(bufCommand, "wfn set pin on=", 15)==0) {
+            char * pinString=bufCommand+15;
+            unsigned int pin;
+            char bufOut[100];
+            Serial.println("Change pin status to on");
+            Serial.println(pinString);
+            sscanf(pinString,"%d",&pin);            
+            digitalWrite(pin,HIGH);
+        }
+
+        if(strncmp(bufCommand, "wfn set pin off=", 16)==0) {
+            char * pinString=bufCommand+16;
+            unsigned int pin;
+            char bufOut[100];
+            Serial.println("Change pin status to on");
+            Serial.println(pinString);
+            sscanf(pinString,"%d",&pin);            
+            digitalWrite(pin,LOW);
+        }
+
         sendOK();
+    }
+    
+    void sendString(char *bufToSend) {        
+        Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+        Udp.write(bufToSend);
+        Udp.endPacket();
     }
 
     void sendOK() {        
