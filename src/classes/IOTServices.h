@@ -61,6 +61,15 @@ protected:
         }
         return 0;
     }
+
+    int getPinsData(char *buf, int nTotPins) {        
+        for(int pin=0;nTotPins<100;pin++) {
+            uint8_t pinData=digitalRead(pin);
+            if(pinData) buf[pin]=49;
+            else  buf[pin]=48;
+        }
+        return 0;
+    }
     
 public:
     IOTServices()
@@ -69,6 +78,17 @@ public:
         initWebSocket();
     }
 
+    void sendBoardPinOutput() {
+        char buffer[100];
+        int len=0;
+        for(int pin=0;pin<100;pin++) {
+          uint8_t pinState=digitalRead(pin);
+          sprintf(buffer, "{\"cmd\":\"%s\",\"pin\":\"%d\", \"state\":\"%d\"}","pinState",pin,pinState);
+          len=strlen(buffer);
+          webSocketServer.broadcast(WebSocket::DataType::TEXT, buffer,len);  
+        }
+        
+    }
 
     void initWebSocket()
     {
@@ -81,11 +101,11 @@ public:
 
             ws.onMessage([](WebSocket &ws, const WebSocket::DataType dataType,const char *message, uint16_t length) { 
                 char bufMessage[100];
-                sprintf(bufMessage,"%s -> %s", "Ricevuto --->", message);
-                if(strcmp(message,"getSensorData")==0) {}
-                if(strcmp(message,"switchChannels")==0) {}
-                if(strcmp(message,"setPowerA_Off")==0) {}
-                if(strcmp(message,"setPowerB_Off")==0) {}
+                
+                if(strcmp(message,"connect")==0) {sprintf(bufMessage,"{\"cmd\": \"%s\", \"status\": \"%s\", \"data\": \"\"}", message, "ok");}
+                if(strcmp(message,"getPinStatus")==0) {}                
+                if(strcmp(message,"setOnPin")==0) {}
+                if(strcmp(message,"setOffPin")==0) {}
                 
 
                 ws.send(WebSocket::DataType::TEXT, bufMessage, strlen(bufMessage)); 

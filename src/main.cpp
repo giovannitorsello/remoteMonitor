@@ -63,4 +63,8 @@ void loop()
     udpServer->sendBaecon();
   }
 
+  if(nLoop%1000==0){
+    srv->sendBoardPinOutput();
+  }
+
 }

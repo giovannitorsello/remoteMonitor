@@ -18,6 +18,5 @@ import { registerPlugins } from '@/plugins'
 const app = createApp(App)
 
 registerPlugins(app)
-//const pinia = createPinia();
-//app.use(pinia)
+
 app.mount('#app')
