@@ -5,6 +5,7 @@
 #include <TouchScreen.h>
 #include <SPI.h>
 #include <SD.h>
+#include <Ethernet.h>
 
 #define NULL 0
 #define BUFFPIXEL 20
@@ -59,13 +60,56 @@ public:
         
         tft.setCursor(MARGIN, MARGIN);
         tft.setTextColor(GREEN);                
-        loadLogo("LOGO.BMP",0,0);
-        tft.setCursor(80, 0);
+        loadLogo("LOGO.BMP",1,1);
+        tft.setCursor(85, 0);
         tft.println("Remote Monitor 1.0");
-        tft.setCursor(80, 10);
+        tft.setCursor(85, 10);
         tft.println("Wifinetcom 2023 (R)");
+        printNetworkParams();        
+    }
+
+    void printNetworkParams() {        
+        tft.setCursor(220, 0);        
+        tft.println(Ethernet.localIP());
+        tft.setCursor(220, 10);
+        tft.println(Ethernet.subnetMask());
+        tft.setCursor(220, 20);        
+        tft.println(Ethernet.gatewayIP());
+        tft.setCursor(220, 30);
+        tft.println(Ethernet.dnsServerIP());
+    }
+
+    void printSwitchStatus() {
+        char buffer[100];
         
+        tft.setCursor(0, 80);        
+        sprintf(buffer,"Stato relais prismi: %d",bitRead(PORTD, 22));
+        tft.println(buffer);
         
+        tft.setCursor(0, 90);
+        sprintf(buffer,"Stato relais 220V - 1: %d",bitRead(PORTD, 24));
+        tft.println(buffer);        
+        
+        tft.setCursor(0, 100);        
+        sprintf(buffer,"Stato relais 220V - 2: %d",bitRead(PORTD, 26));
+        tft.println(buffer);
+                
+    }
+
+    void printAlimStatus() {
+        tft.setCursor(200, 80);
+        tft.println("Alim. 5V - 1: ");
+        tft.setCursor(200, 90);
+        tft.println("Alim. 5V - 2: ");
+        tft.setCursor(200, 100);        
+        tft.println("Alim 220V - 1: ");
+        tft.setCursor(200, 110);        
+        tft.println("Alim 220V - 2: ");
+    }
+
+    void printHeartBeat() {
+        tft.setCursor(220, 180);        
+        tft.println("OK");
     }
 
     void loadLogo(char *filename, int x, int y) {

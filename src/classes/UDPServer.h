@@ -7,6 +7,7 @@
 #include "../constants.h"
 #include "./classes/config.h"
 #include "./classes/sdcard.h"
+#include "./classes/screen.h"
 #define UDP_TX_PACKET_MAX_SIZE 100
 
 
@@ -19,6 +20,7 @@ class UDPServer
 {
 
 private:
+    Screen *sc = 0;
     Config *cnf = 0;
     SdCard *sd = 0;
     EthernetUDP Udp;
@@ -27,9 +29,14 @@ protected:
 
 public:
     UDPServer()
-    {        
+    {                
         initUdpServer();
     }
+
+    void setDisplay(Screen *scr)
+    {
+        sc=scr;
+    }   
 
     void initUdpServer() {
 
@@ -42,7 +49,7 @@ public:
             Serial.println("Ethernet cable is not connected.");
     
         Serial.print("Arduino's IP Address: ");
-        Serial.println(Ethernet.localIP());
+        Serial.println(Ethernet.localIP());        
 
         Serial.print("DNS Server's IP Address: ");
         Serial.println(Ethernet.dnsServerIP());
@@ -53,7 +60,6 @@ public:
         Serial.print("Network's Subnet Mask: ");
         Serial.println(Ethernet.subnetMask());
     
-
         Serial.println("UDP server is starting...");
         cnf=new Config();
         Udp.begin(3000);
@@ -78,7 +84,7 @@ public:
             Serial.print(", port ");
             Serial.println(Udp.remotePort());
 
-            // read the packet into packetBufffer
+            // read the packet into packetBuffer
             Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
             Serial.println("Received command:");
             Serial.println(packetBuffer);
@@ -99,6 +105,7 @@ public:
         Ethernet.begin(mac, myIP, myDNS, myGW, mySN);        
         Udp.begin(3000);
         Serial.println("Configuration applied.");
+        //if(sc) sc->printNetworkParams();
     }
 
     void parseCommand(char bufCommand[UDP_TX_PACKET_MAX_SIZE]) {

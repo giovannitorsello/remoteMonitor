@@ -38,14 +38,20 @@ void setup()
 {
   Serial.begin(9600);
   pinMode(LED_ONBOARD, OUTPUT);
+  pinMode(22, OUTPUT);
+  pinMode(24, OUTPUT);
+  pinMode(26, OUTPUT);
 
   // sd = new SdCard();
   //  cnf = new Config();
-  //  sc = new Screen(SCREEN_ADDRESS, SCREEN_WIDTH, SCREEN_HEIGHT, OLED_RESET, &Wire);
   //  th = new Thermometer(ONE_WIRE_BUS);  
-  srv = new IOTServices();
   udpServer= new UDPServer();
+  srv = new IOTServices();
   sc = new Screen();
+  if(sc) {
+    udpServer->setDisplay(sc);
+    srv->setDisplay(sc);
+  }
 }
 
 void loop()

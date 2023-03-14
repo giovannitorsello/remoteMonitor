@@ -12,17 +12,13 @@ using namespace net;
 EthernetServer server(80);
 WebSocketServer webSocketServer(81);
 
-
-void verifyClientCallback()
-{
-}
-
 class IOTServices
 {
 
 private:
     const int sdPinSelect = 4;
     const int ethPinSelect = 10;
+    Screen *sc = 0;
     Config *cnf = 0;
     SdCard *sd = 0;
 
@@ -73,9 +69,14 @@ protected:
     
 public:
     IOTServices()
-    {
+    {        
         initWebServer();
         initWebSocket();
+    }
+
+    void setDisplay(Screen *scr)
+    {
+        sc=scr;
     }
 
     void sendBoardPinOutput() {
@@ -101,12 +102,14 @@ public:
             ws.onMessage([](WebSocket &ws, const WebSocket::DataType dataType,const char *message, uint16_t length) { 
                 char bufMessage[100];
                 memset(bufMessage,0,100);
-                Serial.println("Received: ");Serial.println(message);
-                if(strcmp(message,"connect")==0) {sprintf(bufMessage,"{\"cmd\": \"%s\", \"status\": \"%s\", \"data\": \"\"}", message, "ok");}
+                //Serial.println("Received: ");Serial.println(message);
+                if(strcmp(message,"connect")==0) {
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"status\": \"%s\", \"data\": \"\"}", message, "ok");
+                }
+
                 if(strncmp(message,"togglePin_",10)==0) {
                     char *pinString=(char *) message+10;                    
-                    int pin=atoi(pinString);
-                    pinMode(pin, OUTPUT);
+                    int pin=atoi(pinString);                    
                     int pinStatus=digitalRead(pin);
                     if(pinStatus==1) {
                         digitalWrite(pin,0);
@@ -116,23 +119,21 @@ public:
                         digitalWrite(pin,1);
                         Serial.println("Set pin on -->: ");Serial.println(pinString);
                     }
-                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "tooglePin", pin, "ok");
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "tooglePin", pin, "ok");                    
                 }
                 if(strncmp(message,"setOnPin_",9)==0) {
                     char *pinString=(char *) message+9;                    
-                    int pin=atoi(pinString);
-                    pinMode(pin, OUTPUT);
-                    digitalWrite(pin,1);
+                    int pin=atoi(pinString);                    
+                    digitalWrite(pin,HIGH);
                     Serial.println("Set pin on -->: ");Serial.println(pinString);
-                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOnPin", pin, "ok");
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOnPin", pin, "ok");                    
                 }
                 if(strncmp(message,"setOffPin_",10)==0) {
                     char *pinString=(char *) message+10;                    
-                    int pin=atoi(pinString);
-                    pinMode(pin, OUTPUT);
-                    digitalWrite(pin,0);
+                    int pin=atoi(pinString);                    
+                    digitalWrite(pin,LOW);
                     Serial.println("Set pin off -->: ");Serial.println(pinString);
-                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOffPin", pin, "ok");
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOffPin", pin, "ok");                    
                 }
                 
                 int len=strlen(bufMessage);
@@ -158,6 +159,10 @@ public:
     int webSocketLoop()
     {
         webSocketServer.listen();
+        if(sc) {
+            sc->printSwitchStatus();
+            sc->printAlimStatus();            
+        }
         return 0;
     }
 
