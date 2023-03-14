@@ -89,26 +89,59 @@ public:
         }
         
     }
-
+    
     void initWebSocket()
-    {
-       
+    {        
         webSocketServer.onConnection([](WebSocket &ws)
-        {        
+        {                   
             ws.onClose([](WebSocket &ws, const WebSocket::CloseCode code,const char *reason, uint16_t length){ 
                 Serial.println("Client close connection."); 
             });
 
             ws.onMessage([](WebSocket &ws, const WebSocket::DataType dataType,const char *message, uint16_t length) { 
                 char bufMessage[100];
-                
+                memset(bufMessage,0,100);
+                Serial.println("Received: ");Serial.println(message);
                 if(strcmp(message,"connect")==0) {sprintf(bufMessage,"{\"cmd\": \"%s\", \"status\": \"%s\", \"data\": \"\"}", message, "ok");}
-                if(strcmp(message,"getPinStatus")==0) {}                
-                if(strcmp(message,"setOnPin")==0) {}
-                if(strcmp(message,"setOffPin")==0) {}
+                if(strncmp(message,"togglePin_",10)==0) {
+                    char *pinString=(char *) message+10;                    
+                    int pin=atoi(pinString);
+                    pinMode(pin, OUTPUT);
+                    int pinStatus=digitalRead(pin);
+                    if(pinStatus==1) {
+                        digitalWrite(pin,0);
+                        Serial.println("Set pin off -->: ");Serial.println(pinString);
+                    }
+                    if(pinStatus==0) {
+                        digitalWrite(pin,1);
+                        Serial.println("Set pin on -->: ");Serial.println(pinString);
+                    }
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "tooglePin", pin, "ok");
+                }
+                if(strncmp(message,"setOnPin_",9)==0) {
+                    char *pinString=(char *) message+9;                    
+                    int pin=atoi(pinString);
+                    pinMode(pin, OUTPUT);
+                    digitalWrite(pin,1);
+                    Serial.println("Set pin on -->: ");Serial.println(pinString);
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOnPin", pin, "ok");
+                }
+                if(strncmp(message,"setOffPin_",10)==0) {
+                    char *pinString=(char *) message+10;                    
+                    int pin=atoi(pinString);
+                    pinMode(pin, OUTPUT);
+                    digitalWrite(pin,0);
+                    Serial.println("Set pin off -->: ");Serial.println(pinString);
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOffPin", pin, "ok");
+                }
                 
-
-                ws.send(WebSocket::DataType::TEXT, bufMessage, strlen(bufMessage)); 
+                int len=strlen(bufMessage);
+                if(len>0)
+                    ws.send(WebSocket::DataType::TEXT, bufMessage, len); 
+                else {
+                    sprintf(bufMessage,"{\"cmd\": \"%s\", \"status\": \"%s\", \"data\": \"\"}", message, "error");
+                    ws.send(WebSocket::DataType::TEXT, bufMessage, strlen(bufMessage)); 
+                }
             }); 
         });
 

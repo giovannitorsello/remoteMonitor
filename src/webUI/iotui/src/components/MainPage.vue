@@ -1,5 +1,14 @@
 <template>
   <div>
+    <v-snackbar
+      v-model="successAlert"
+      :timeout="3000"
+      color="green"
+    >
+      Operazione eseguita senza errori.
+    </v-snackbar>
+    
+
     <div v-if="bShowBoardParameters">
       <v-sheet width="300" class="mx-auto">
         <v-form @submit.prevent>
@@ -52,13 +61,14 @@
 
           <v-card-text> </v-card-text>
           <v-switch
-            :id="getChipPinId(output.pin)"
-            :label="output.description"
             v-for="output in group.digitalOutputs"
+            :id="getSwitchPinId(output.pin)"
+            :label="output.description"            
             v-bind:key="output.pin"
             v-model="switches"
             :value="output.pin"
-            @click="manageSwitches"
+            color="primary"
+            @change="manageSwitches"
           ></v-switch>
         </v-card>
         <v-divider></v-divider>       
@@ -68,6 +78,7 @@
             >Disconnect</v-btn
           >
 
+      
     </div>
   </div>
 </template>
@@ -86,10 +97,11 @@ export default {
     pinConfiguration: {},
     switches: [],
     ws: {},
+    successAlert: false,
   }),
   methods: {
     parseWebSocketMessage(wsMsg) {
-      //console.log(wsMsg);
+      console.log(wsMsg);
       if(wsMsg.status==='ok' && wsMsg.cmd==="connect") {
         this.readConfiguration();
         this.bShowBoardParameters=false; 
@@ -101,6 +113,16 @@ export default {
         if(pinState==1) this.setDigitalOutputHigh(pin);
         if(pinState==0) this.setDigitalOutputLow(pin);
       }
+
+      if(wsMsg.cmd==="setOnPin" && wsMsg.status==="ok") {
+        this.successAlert=true;
+        setTimeout(()=>{this.successAlert=false;},3000);
+      }
+      if(wsMsg.cmd==="setOffPin" && wsMsg.status==="ok") {
+        this.successAlert=true;
+        setTimeout(()=>{this.successAlert=false;},3000);
+      }
+
     },
     readConfiguration() {
       fetch("./"+this.boardIp+".json")
@@ -125,12 +147,13 @@ export default {
 
       componentUI.ws.onmessage = function (evt) {
         var received_msg = evt.data;        
+        //console.log(received_msg);
         var msgObj=JSON.parse(received_msg);
         componentUI.parseWebSocketMessage(msgObj);
       };
 
       componentUI.ws.onclose = function () {
-        console.log("Disconencted.");
+        console.log("Disconnected.");
       };
     },
     setCorsAccess() {
@@ -177,11 +200,25 @@ export default {
       const headerPage = document.head;
       headerPage.append(meta);
     },
-    manageSwitches(elem) {
-      console.log(elem.srcElement.value);
+    manageSwitches(elem) {                 
+      let idElement=elem.srcElement.id;
+      let pin=idElement.replace("switchInputPin","");
+      
+      let bValuePin=this.switches.find(element => element == pin);
+      if(bValuePin) {
+        this.ws.send("setOnPin_"+pin);
+        console.log("Switch pin "+ pin + " in state on");
+      }
+      if(!bValuePin) {
+        this.ws.send("setOffPin_"+pin);      
+        console.log("Switch pin "+ pin + " in state off");
+      }
     },
     getChipPinId(pin) {
       return "chipInputPin" + pin;
+    },
+    getSwitchPinId(pin) {
+      return "switchInputPin" + pin;
     },
     setDigitalOutputHigh(pin) {
       var id = "chipInputPin" + pin;

@@ -2,41 +2,41 @@
     "groupsDigitalInputs":[
             {"gid": 1, "description": "Prismi Ottici", "digitalInputs":
             [
-                {"pin":1, "description": "Prisma 1"},
-                {"pin":2, "description": "Prisma 2"},
-                {"pin":3, "description": "Prisma 3"},
-                {"pin":4, "description": "Prisma 4"},
-                {"pin":5, "description": "Prisma 5"},
-                {"pin":6, "description": "Prisma 6"},
-                {"pin":7, "description": "Prisma 7"},
-                {"pin":8, "description": "Prisma 8"},
-                {"pin":9, "description": "Prisma 9"},
-                {"pin":10, "description": "Prisma 10"},
-                {"pin":11, "description": "Prisma 11"},
-                {"pin":12, "description": "Prisma 12"},
-                {"pin":13, "description": "Prisma 13"},
-                {"pin":14, "description": "Prisma 14"},
-                {"pin":15, "description": "Prisma 15"},
-                {"pin":16, "description": "Prisma 16"}      
+                {"pin": 1, "description": "Prisma 1"},
+                {"pin": 2, "description": "Prisma 2"},
+                {"pin": 3, "description": "Prisma 3"},
+                {"pin": 4, "description": "Prisma 4"},
+                {"pin": 5, "description": "Prisma 5"},
+                {"pin": 6, "description": "Prisma 6"},
+                {"pin": 7, "description": "Prisma 7"},
+                {"pin": 8, "description": "Prisma 8"},
+                {"pin": 9, "description": "Prisma 9"},
+                {"pin": 10, "description": "Prisma 10"},
+                {"pin": 11, "description": "Prisma 11"},
+                {"pin": 12, "description": "Prisma 12"},
+                {"pin": 13, "description": "Prisma 13"},
+                {"pin": 14, "description": "Prisma 14"},
+                {"pin": 15, "description": "Prisma 15"},
+                {"pin": 16, "description": "Prisma 16"}
             ]},
-            {"gid":2, "description": "Alimentazioni di rete", "digitalInputs":[
-                {"pin":17, "description": "Presenza Rete Elettrica A"},
-                {"pin":18, "description": "Presenza Rete Elettrica B"}      
+            {"gid": 2, "description": "Alimentazioni di rete", "digitalInputs":[
+                {"pin": 17, "description": "Presenza Rete Elettrica A"},
+                {"pin": 18, "description": "Presenza Rete Elettrica B"}      
             ]},
-            {"gid":3, "description": "Uscita alimentatori switching", "digitalInputs":[
-                {"pin":19, "description": "Presenza Alimentazione 12V A"},
-                {"pin":20, "description": "Presenza Alimentazione 12V B"},
-                {"pin":21, "description": "Presenza Alimentazione 5V A"},
-                {"pin":22, "description": "Presenza Alimentazione 5V B"}        
+            {"gid": 3, "description": "Uscita alimentatori switching", "digitalInputs":[
+                {"pin": 19, "description": "Presenza Alimentazione 12V A"},
+                {"pin": 20, "description": "Presenza Alimentazione 12V B"},
+                {"pin": 21, "description": "Presenza Alimentazione 5V A"},
+                {"pin": 22, "description": "Presenza Alimentazione 5V B"}        
             ]}     
         ],
     "groupsDigitalOutputs":[
         {"gid": 1, "description": "Prismi Ottici Canali Fibra", "digitalOutputs": [
-            {"pin":30, "description": "Switching forzato Prismi Ottici"}
+            {"pin": 22, "description": "Switching forzato Prismi Ottici"}
         ]},
         {"gid": 2, "description": "Alimentazioni 220V", "digitalOutputs": [
-            {"pin":31, "description": "Interrompi Alimentazione A"},
-            {"pin":32, "description": "Interrompi Alimentazione B"}
+            {"pin": 24, "description": "Interrompi Alimentazione A"},
+            {"pin": 26, "description": "Interrompi Alimentazione B"}
         ]}
     ]
         

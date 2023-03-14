@@ -20,7 +20,8 @@ Screen *sc = 0;
 Thermometer *th = 0;
 UDPServer *udpServer=0;
 
-int nLoop=0;
+int nLoopUDP=0;
+int nLoopBoard=0;
 
 void alive_by_led()
 {
@@ -44,6 +45,7 @@ void setup()
   //  th = new Thermometer(ONE_WIRE_BUS);  
   srv = new IOTServices();
   udpServer= new UDPServer();
+  sc = new Screen();
 }
 
 void loop()
@@ -57,13 +59,15 @@ void loop()
   delay(1);
   
   //Section periodic operations
-  nLoop++;
-  if(nLoop%3000==0){
-    nLoop=0;
+  nLoopUDP++;
+  if(nLoopUDP%3000==0){
+    nLoopUDP=0;
     udpServer->sendBaecon();
   }
 
-  if(nLoop%1000==0){
+  nLoopBoard++;
+  if(nLoopBoard%3000==0){
+    nLoopBoard=0;
     srv->sendBoardPinOutput();
   }
 
