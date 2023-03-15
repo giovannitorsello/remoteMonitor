@@ -5,7 +5,6 @@
 #include <TouchScreen.h>
 #include <SPI.h>
 #include <SD.h>
-#include <Ethernet.h>
 
 #define NULL 0
 #define BUFFPIXEL 20
@@ -64,19 +63,18 @@ public:
         tft.setCursor(85, 0);
         tft.println("Remote Monitor 1.0");
         tft.setCursor(85, 10);
-        tft.println("Wifinetcom 2023 (R)");
-        printNetworkParams();        
+        tft.println("Wifinetcom 2023 (R)");        
     }
 
-    void printNetworkParams() {        
+    void printNetworkParams(char ip[], char nm[], char gw[], char dns[]) {        
         tft.setCursor(220, 0);        
-        tft.println(Ethernet.localIP());
+        tft.println(ip);
         tft.setCursor(220, 10);
-        tft.println(Ethernet.subnetMask());
+        tft.println(nm);
         tft.setCursor(220, 20);        
-        tft.println(Ethernet.gatewayIP());
+        tft.println(gw);
         tft.setCursor(220, 30);
-        tft.println(Ethernet.dnsServerIP());
+        tft.println(dns);
     }
 
     void printSwitchStatus() {

@@ -58,23 +58,29 @@ void loop()
 {
   udpServer->udpServerLoop();
   srv->webSocketLoop();
-  if (srv->listenClient())
+  delay(10);
+  /*if (srv->listenClient())
   {
     alive_by_led();
-  }
-  delay(1);
-  
-  //Section periodic operations
+  }*/
+    
+  //Section periodic operations UDP
   nLoopUDP++;
-  if(nLoopUDP%3000==0){
+  if(nLoopUDP%300==0){
     nLoopUDP=0;
     udpServer->sendBaecon();
   }
 
+  //Section periodic operations Screen
   nLoopBoard++;
-  if(nLoopBoard%3000==0){
+  if(nLoopBoard%20==0){
     nLoopBoard=0;
-    srv->sendBoardPinOutput();
+    //srv->sendPingAliveToClient();
+    //Update screen data
+    if(sc) {
+      sc->printSwitchStatus();
+      sc->printAlimStatus();            
+    }
   }
-
+  
 }

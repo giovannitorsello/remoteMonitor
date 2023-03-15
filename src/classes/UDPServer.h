@@ -99,13 +99,13 @@ public:
         _configData cnfData = cnf->getConfig();
         byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
         IPAddress myIP(cnfData.ip_address[0], cnfData.ip_address[1], cnfData.ip_address[2], cnfData.ip_address[3]);
-        IPAddress mySN(cnfData.netmask[0], cnfData.netmask[1], cnfData.netmask[2], cnfData.netmask[3]);
+        IPAddress myNM(cnfData.netmask[0], cnfData.netmask[1], cnfData.netmask[2], cnfData.netmask[3]);
         IPAddress myGW(cnfData.gateway[0], cnfData.gateway[1], cnfData.gateway[2], cnfData.gateway[3]);
         IPAddress myDNS(cnfData.dns[0], cnfData.dns[1], cnfData.dns[2], cnfData.dns[3]);
-        Ethernet.begin(mac, myIP, myDNS, myGW, mySN);        
+        Ethernet.begin(mac, myIP, myDNS, myGW, myNM);
         Udp.begin(3000);
         Serial.println("Configuration applied.");
-        //if(sc) sc->printNetworkParams();
+        if(sc) sc->printNetworkParams(Ethernet.localIP(), Ethernet.subnetMask(), Ethernet.gatewayIP(), Ethernet.dnsServerIP());        
     }
 
     void parseCommand(char bufCommand[UDP_TX_PACKET_MAX_SIZE]) {

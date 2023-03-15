@@ -122,7 +122,7 @@ export default {
         this.successAlert=true;
         setTimeout(()=>{this.successAlert=false;},3000);
       }
-
+      this.ws.send({cmd: "", status: "ok"});
     },
     readConfiguration() {
       fetch("./"+this.boardIp+".json")

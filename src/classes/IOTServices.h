@@ -9,7 +9,7 @@
 
 #define UNKNOWN_PIN 0xFF
 using namespace net;
-EthernetServer server(80);
+//EthernetServer server(80);
 WebSocketServer webSocketServer(81);
 
 class IOTServices
@@ -70,8 +70,9 @@ protected:
 public:
     IOTServices()
     {        
-        initWebServer();
-        initWebSocket();
+        // INIT SD CARD FIRST
+        sd = new SdCard();       
+        initWebSocket();        
     }
 
     void setDisplay(Screen *scr)
@@ -79,14 +80,29 @@ public:
         sc=scr;
     }
 
-    void sendBoardPinOutput() {
-        char buffer[100];
+    void sendPingAliveToClient() {
+        char buffer[50];
         int len=0;
-        for(int pin=0;pin<100;pin++) {
+        memset(buffer,0,50);
+        sprintf(buffer, "{\"cmd\":\"%s\", \"state\":\"%s\"}","ping","ok");
+        len=strlen(buffer);                    
+        //webSocketServer.broadcast(WebSocket::DataType::TEXT, buffer,len);
+    }
+
+    void sendAllPinStatus() {
+        char buffer[50];
+        int len=0;
+        for(int pin=0;pin<100;pin++) {        
           uint8_t pinState=digitalRead(pin);
+          memset(buffer,0,50);
           sprintf(buffer, "{\"cmd\":\"%s\",\"pin\":\"%d\", \"state\":\"%d\"}","pinState",pin,pinState);
-          len=strlen(buffer);
-          webSocketServer.broadcast(WebSocket::DataType::TEXT, buffer,len);  
+          len=strlen(buffer);          
+          //Serial.println(buffer);
+          if(len>0)
+          {         
+            webSocketServer.broadcast(WebSocket::DataType::TEXT, buffer,len);
+            delay(200);
+          }
         }
         
     }
@@ -102,7 +118,7 @@ public:
             ws.onMessage([](WebSocket &ws, const WebSocket::DataType dataType,const char *message, uint16_t length) { 
                 char bufMessage[100];
                 memset(bufMessage,0,100);
-                //Serial.println("Received: ");Serial.println(message);
+                Serial.print("Received: ");Serial.println(message);
                 if(strcmp(message,"connect")==0) {
                     sprintf(bufMessage,"{\"cmd\": \"%s\", \"status\": \"%s\", \"data\": \"\"}", message, "ok");
                 }
@@ -113,28 +129,47 @@ public:
                     int pinStatus=digitalRead(pin);
                     if(pinStatus==1) {
                         digitalWrite(pin,0);
-                        Serial.println("Set pin off -->: ");Serial.println(pinString);
+                        Serial.print("Set pin off -->: ");Serial.println(pinString);
                     }
                     if(pinStatus==0) {
                         digitalWrite(pin,1);
-                        Serial.println("Set pin on -->: ");Serial.println(pinString);
+                        Serial.print("Set pin on -->: ");Serial.println(pinString);
                     }
                     sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "tooglePin", pin, "ok");                    
                 }
+
                 if(strncmp(message,"setOnPin_",9)==0) {
                     char *pinString=(char *) message+9;                    
                     int pin=atoi(pinString);                    
                     digitalWrite(pin,HIGH);
-                    Serial.println("Set pin on -->: ");Serial.println(pinString);
+                    Serial.print("Set pin on -->: ");Serial.println(pinString);
                     sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOnPin", pin, "ok");                    
                 }
+
                 if(strncmp(message,"setOffPin_",10)==0) {
                     char *pinString=(char *) message+10;                    
                     int pin=atoi(pinString);                    
                     digitalWrite(pin,LOW);
-                    Serial.println("Set pin off -->: ");Serial.println(pinString);
+                    Serial.print("Set pin off -->: ");Serial.println(pinString);
                     sprintf(bufMessage,"{\"cmd\": \"%s\", \"pin\": \"%d\", \"status\": \"%s\", \"data\": \"\"}", "setOffPin", pin, "ok");                    
                 }
+                
+                if(strncmp(message,"getAllPinStatus",15)==0) {
+                    char buffer[100];
+                    int len=0;
+                    for(int pin=0;pin<100;pin++) {
+                    uint8_t pinState=digitalRead(pin);
+                    sprintf(buffer, "{\"cmd\":\"%s\",\"pin\":\"%d\", \"state\":\"%d\"}","pinState",pin,pinState);
+                    len=strlen(buffer);
+                    Serial.println(buffer);
+                    if(len>0)
+                        ws.send(WebSocket::DataType::TEXT, buffer, len); 
+                        //webSocketServer.broadcast(WebSocket::DataType::TEXT, buffer,len);  
+                    }                            
+                }
+
+
+
                 
                 int len=strlen(bufMessage);
                 if(len>0)
@@ -146,26 +181,21 @@ public:
             }); 
         });
 
-        server.begin();
+        webSocketServer.begin();
     }
-
-    void initWebServer()
-    {
-        // INIT SD CARD FIRST
-        sd = new SdCard();                
-    }
-
 
     int webSocketLoop()
     {
-        webSocketServer.listen();
-        if(sc) {
-            sc->printSwitchStatus();
-            sc->printAlimStatus();            
-        }
+        webSocketServer.listen();        
         return 0;
     }
 
+    /*
+    void initWebServer()
+    {
+                      
+    }
+    
     int
     listenClient()
     {
@@ -230,7 +260,7 @@ public:
             client.stop(); // close the connection
         }                  // end if (client)
         return clientConnected;
-    }
+    }*/
 };
 
 #endif
